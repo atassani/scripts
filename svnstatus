@@ -1,0 +1,8 @@
+#!/bin/bash
+line='----------------------------------------'
+for f in `ls`; do
+  if [ -d $f ]; then
+    printf "%s %s %s\n" ${line:38} $f ${line:${#f}}
+    cd $f; svn status; cd ..
+  fi
+done
