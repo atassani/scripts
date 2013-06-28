@@ -9,5 +9,5 @@ for f in `find . -name target`; do svn delete --force $f; done
 for f in `find . -name bin`; do svn delete --force $f; done
 
 for d in *; do
- svn propset svn:ignore -F "c:\workarea\code\ignore_list.txt" $d
+ svn propset svn:ignore -F "e:\code\scripts\ignore_list.txt" $d
 done
