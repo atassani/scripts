@@ -1,6 +1,5 @@
 #!/usr/bin/bash
 
-for f in `find . -name .svn`; do svn delete --force $f; done
 for f in `find . -name .classpath`; do svn delete --force $f; done
 for f in `find . -name .preferences`; do svn delete --force $f; done
 for f in `find . -name .settings`; do svn delete --force $f; done

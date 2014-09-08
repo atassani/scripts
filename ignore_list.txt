@@ -1,7 +1,8 @@
+bin
 target
 .classpath
 .project
 .preferences
 .settings
 .svn
-
+.git

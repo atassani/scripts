@@ -1,0 +1,6 @@
+#!/bin/bash
+rm -rf /cygdrive/e/workarea/tools/server/jboss-5.1.0.GA/server/ngg/work
+rm -rf /cygdrive/e/workarea/tools/server/jboss-5.1.0.GA/server/ngg/data
+rm -rf /cygdrive/e/workarea/tools/server/jboss-5.1.0.GA/server/ngg/tmp
+rm -rf /cygdrive/e/workarea/tools/server/jboss-5.1.0.GA/server/ngg/log
+echo "Removed folders in ngg: work, data, tmp and log"

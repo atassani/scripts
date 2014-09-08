@@ -1,0 +1,4 @@
+#!/bin/bash
+rm -f /cygdrive/e/workarea/tools/server/jboss-5.1.0.GA/server/ngg/deploy/ngg.war
+cp --preserve=all /cygdrive/e/workarea/code/GUI/web/target/ngg.war /cygdrive/e/workarea/tools/server/jboss-5.1.0.GA/server/ngg/deploy
+echo "ngg.war copied from /cygdrive/e/workarea/code/GUI/web/target to /cygdrive/e/workarea/tools/server/jboss-5.1.0.GA/server/ngg/deploy"
