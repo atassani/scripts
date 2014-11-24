@@ -15,6 +15,7 @@ tenv() {
     export TENV
     export TJBOSS
 
+    MSG=$TENV
     if [[ $TENV == "api" ]]; then
         export PROJECT_SRC="E:\workarea\code\ClinicalGenomics\api\whole_api_to_rename\cga-api-src\trunk"
         export PROJECT_CONF="E:\workarea\code\ClinicalGenomics\api\whole_api_to_rename\cga-api-conf\trunk"
@@ -23,11 +24,18 @@ tenv() {
         export PROJECT_SRC="E:\workarea\code\ClinicalGenomics\services\whole_services_to_rename\cgs-retrieve\cgs-retrieve-src\trunk"
         export PROJECT_CONF="E:\workarea\code\ClinicalGenomics\services\whole_services_to_rename\cgs-retrieve\cgs-retrieve-conf\trunk"
         export APP_CONF=$PROJECT_CONF"\app-conf\dev-dtc"  
+    elif [[ $TENV == "apiw" ]]; then
+        export PROJECT_SRC="E:\workarea\code\ClinicalGenomics\api\cga-api-src"
+        export PROJECT_CONF="E:\workarea\code\ClinicalGenomics\api\cga-api-conf"
+        export APP_CONF=$PROJECT_CONF"\app-conf\local"
+    elif [[ $TENV == "retrievew" ]]; then
+        export PROJECT_SRC="E:\workarea\code\ClinicalGenomics\services\retrieve\cgs-retrieve-src"
+        export PROJECT_CONF="E:\workarea\code\ClinicalGenomics\services\retrieve\cgs-retrieve-conf"
+        export APP_CONF=$PROJECT_CONF"\app-conf\dev-dtc"  
     else
         MSG="UNKNOWN";
     fi
     echo "Environment: $MSG and $TJBOSS" 
-    MSG=$TENV
 
     export DEPLOYMENT_SOURCE=*war/target/*.war  
     export PATH="$JAVA_HOME"/bin:"$JBOSS_HOME"/bin:$PATH
@@ -48,18 +56,21 @@ tenv() {
 
 tcleandeploy() {
     if _isEnvironmentSet; then return; fi
-    rm -rf "$JBOSS_HOME"/standalone/deployments/*
+    case $JBOSS in
+        jboss5)
+            rm -rf "$JBOSS_HOME"/server/$JBOSS_CONFIG/deploy/* ;;
+        *)
+            rm -rf "$JBOSS_HOME"/standalone/deployments/*
+    esac    
 }
 
 tdep() {
     if _isEnvironmentSet; then return; fi
-    case $TENV in
-        java6)
-            DESTINATION="$JBOSS_HOME"/server/$JBOSS_CONFIG/deploy
-        ;;
-        java7|java8|retrieve|api)
-            DESTINATION="$JBOSS_HOME"/standalone/deployments
-        ;;
+    case $JBOSS in
+        jboss5)
+            DESTINATION="$JBOSS_HOME"/server/$JBOSS_CONFIG/deploy;;
+        *)
+            DESTINATION="$JBOSS_HOME"/standalone/deployments;;
     esac
 
     cp -v "$PROJECT_SRC"/$DEPLOYMENT_SOURCE $DESTINATION
@@ -79,6 +90,7 @@ tfull() {
     mvn clean install
     tdep
     popd
+    trun
 }
 
 tsvn() {
@@ -91,15 +103,15 @@ tsvn() {
 
 trecycle() {
     if _isEnvironmentSet; then return; fi
-    case $TENV in
-        java6)
+    case $TJBOSS in
+        jboss5)
             echo "Recycling $JBOSS_HOME/server/$JBOSS_CONFIG ..."
             rm -rf "$JBOSS_HOME"/server/$JBOSS_CONFIG/log      && echo "log" && \
                 rm -rf "$JBOSS_HOME"/server/$JBOSS_CONFIG/data && echo "data" && \
                 rm -rf "$JBOSS_HOME"/server/$JBOSS_CONFIG/work && echo "work" && \
                 rm -rf "$JBOSS_HOME"/server/$JBOSS_CONFIG/tmp  && echo "tmp" && echo "DONE."
             ;;
-        java7|java8|retrieve|api) 
+        *) 
             echo "Recycling $JBOSS_HOME/standalone ..."
             rm -rf "$JBOSS_HOME"/standalone/log      && echo "log" && \
                 rm -rf "$JBOSS_HOME"/standalone/data && echo "data" && \
@@ -110,9 +122,9 @@ trecycle() {
 
 trun() {
   if _isEnvironmentSet; then return; fi
-  case $TENV in
-    java6)                     "$JBOSS_HOME"/bin/run.bat -c cgt ;;
-    java7|java8|retrieve|api)  "$JBOSS_HOME"/bin/standalone.bat ;;
+  case $TJBOSS in
+    jboss5) "$JBOSS_HOME"/bin/run.bat -c cgt ;;
+    *)      "$JBOSS_HOME"/bin/standalone.bat ;;
   esac
 }
 
