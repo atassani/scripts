@@ -6,3 +6,6 @@ target
 .settings
 .svn
 .git
+*.iml
+.idea
+.0
