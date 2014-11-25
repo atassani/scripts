@@ -25,12 +25,12 @@ tenv() {
         export PROJECT_CONF="E:\workarea\code\ClinicalGenomics\services\whole_services_to_rename\cgs-retrieve\cgs-retrieve-conf\trunk"
         export APP_CONF=$PROJECT_CONF"\app-conf\dev-dtc"  
     elif [[ $TENV == "apiw" ]]; then
-        export PROJECT_SRC="E:\workarea\code\ClinicalGenomics\api\cga-api-src"
-        export PROJECT_CONF="E:\workarea\code\ClinicalGenomics\api\cga-api-conf"
+        export PROJECT_SRC="E:\workarea\code\ClinicalGenomics\api\api-wildfly\cga-api-src"
+        export PROJECT_CONF="E:\workarea\code\ClinicalGenomics\api\api-wildfly\cga-api-conf"
         export APP_CONF=$PROJECT_CONF"\app-conf\local"
     elif [[ $TENV == "retrievew" ]]; then
-        export PROJECT_SRC="E:\workarea\code\ClinicalGenomics\services\retrieve\cgs-retrieve-src"
-        export PROJECT_CONF="E:\workarea\code\ClinicalGenomics\services\retrieve\cgs-retrieve-conf"
+        export PROJECT_SRC="E:\workarea\code\ClinicalGenomics\services\retrieve-wildfly\cgs-retrieve-src"
+        export PROJECT_CONF="E:\workarea\code\ClinicalGenomics\services\retrieve-wildfly\cgs-retrieve-conf"
         export APP_CONF=$PROJECT_CONF"\app-conf\dev-dtc"  
     else
         MSG="UNKNOWN";
