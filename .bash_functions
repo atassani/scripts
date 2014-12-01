@@ -15,32 +15,6 @@ tenv() {
     export TENV
     export TJBOSS
     export JBOSS_STANDALONE=standalone
-    
-    MSG=$TENV
-    if [[ $TENV == "api" ]]; then
-        export PROJECT_SRC="E:\workarea\code\ClinicalGenomics\api\whole_api_to_rename\cga-api-src\trunk"
-        export PROJECT_CONF="E:\workarea\code\ClinicalGenomics\api\whole_api_to_rename\cga-api-conf\trunk"
-        export APP_CONF=$PROJECT_CONF"\app-conf\local"
-        export JBOSS_STANDALONE=standaloneapi
-    elif [[ $TENV == "retrieve" ]]; then
-        export PROJECT_SRC="E:\workarea\code\ClinicalGenomics\services\whole_services_to_rename\cgs-retrieve\cgs-retrieve-src\trunk"
-        export PROJECT_CONF="E:\workarea\code\ClinicalGenomics\services\whole_services_to_rename\cgs-retrieve\cgs-retrieve-conf\trunk"
-        export APP_CONF=$PROJECT_CONF"\app-conf\dev-dtc"  
-    elif [[ $TENV == "apiw" ]]; then
-        export PROJECT_SRC="E:\workarea\code\ClinicalGenomics\api\api-wildfly\cga-api-src"
-        export PROJECT_CONF="E:\workarea\code\ClinicalGenomics\api\api-wildfly\cga-api-conf"
-        export APP_CONF=$PROJECT_CONF"\app-conf\local"
-        export JBOSS_CONSOLE_LOG="E:/tmp/api.log"
-        export JBOSS_STANDALONE=standaloneapi
-    elif [[ $TENV == "retrievew" ]]; then
-        export PROJECT_SRC="E:\workarea\code\ClinicalGenomics\services\retrieve-wildfly\cgs-retrieve-src"
-        export PROJECT_CONF="E:\workarea\code\ClinicalGenomics\services\retrieve-wildfly\cgs-retrieve-conf"
-        export APP_CONF=$PROJECT_CONF"\app-conf\dev-dtc"  
-        export JBOSS_CONSOLE_LOG="E:/tmp/retrieve.log"
-    else
-        MSG="UNKNOWN";
-    fi
-    echo "Environment: $MSG and $TJBOSS" 
 
     export DEPLOYMENT_SOURCE=*war/target/*.war  
     export PATH="$JAVA_HOME"/bin:"$JBOSS_HOME"/bin:$PATH
@@ -48,16 +22,44 @@ tenv() {
         export JAVA_HOME="E:\workarea\tools\jdk1.8.0_20"
         export JBOSS_HOME="E:\workarea\tools\server\wildfly-8.1.0.Final"
         export MAVEN_OPTS="-Xmx1024m -Duser.name=toni.tassani"
+        case $TENV in
+            api|apiw) export JBOSS_STANDALONE=standaloneapi ;;
+        esac
     elif [[ $TJBOSS == "jboss6" ]]; then
         export JAVA_HOME="E:\workarea\tools\jdk1.7.0_71"
         export JBOSS_HOME="E:\workarea\tools\server\jboss-eap-6.3"
         export MAVEN_OPTS="-Xmx1024m"
-        export JBOSS_STANDALONE=standalone
     elif [[ $TJBOSS == "jboss5" ]]; then
         export JAVA_HOME="E:\workarea\tools\jdk1.6.0_20"
         export JBOSS_HOME="e:\workarea\tools\server\jboss-5.1.0.GA"
         export MAVEN_OPTS="-Xmx1024m -XX:MaxPermSize=256m"
     fi
+    
+    MSG=$TENV
+    if [[ $TENV == "api" ]]; then
+        export PROJECT_SRC="E:\workarea\code\ClinicalGenomics\api\whole_api_to_rename\cga-api-src\trunk"
+        export PROJECT_CONF="E:\workarea\code\ClinicalGenomics\api\whole_api_to_rename\cga-api-conf\trunk"
+        export APP_CONF=$PROJECT_CONF"\app-conf\local"
+        export JBOSS_CONSOLE_LOG="$JBOSS_HOME"/$JBOSS_STANDALONE/log/api.log
+    elif [[ $TENV == "retrieve" ]]; then
+        export PROJECT_SRC="E:\workarea\code\ClinicalGenomics\services\whole_services_to_rename\cgs-retrieve\cgs-retrieve-src\trunk"
+        export PROJECT_CONF="E:\workarea\code\ClinicalGenomics\services\whole_services_to_rename\cgs-retrieve\cgs-retrieve-conf\trunk"
+        export APP_CONF=$PROJECT_CONF"\app-conf\dev-dtc"  
+        export JBOSS_CONSOLE_LOG="$JBOSS_HOME"/$JBOSS_STANDALONE/log/retrieve.log
+    elif [[ $TENV == "apiw" ]]; then
+        export PROJECT_SRC="E:\workarea\code\ClinicalGenomics\api\api-wildfly\cga-api-src"
+        export PROJECT_CONF="E:\workarea\code\ClinicalGenomics\api\api-wildfly\cga-api-conf"
+        export APP_CONF=$PROJECT_CONF"\app-conf\toni"
+        export JBOSS_CONSOLE_LOG="$JBOSS_HOME"/$JBOSS_STANDALONE/log/apiw.log
+    elif [[ $TENV == "retrievew" ]]; then
+        export PROJECT_SRC="E:\workarea\code\ClinicalGenomics\services\retrieve-wildfly\cgs-retrieve-src"
+        export PROJECT_CONF="E:\workarea\code\ClinicalGenomics\services\retrieve-wildfly\cgs-retrieve-conf"
+        export APP_CONF=$PROJECT_CONF"\app-conf\dev-dtc"  
+        export JBOSS_CONSOLE_LOG="$JBOSS_HOME"/$JBOSS_STANDALONE/log/retrievew.log
+    else
+        MSG="UNKNOWN";
+    fi
+    echo "Environment: $MSG and $TJBOSS" 
 }
 
 tcleandeploy() {
@@ -131,13 +133,22 @@ trun() {
   case $TJBOSS in
     jboss5) "$JBOSS_HOME"/bin/run.bat -c cgt ;;
     *) 
+        OLD_JAVA_OPTS=$JAVA_OPTS
         case $TENV in
-            apiw|api)   "$JBOSS_HOME"/bin/standalone.bat -Djboss.socket.binding.port-offset=100 -Djboss.server.base.dir="$JBOSS_HOME"/$JBOSS_STANDALONE
-                # -Djboss.node.name=host1 -b=0.0.0.0
-            ;;
-            *)          "$JBOSS_HOME"/bin/standalone.bat ;;
+            apiw|api) 
+                export JAVA_OPTS=$JAVA_OPTS" -Djboss.socket.binding.port-offset=100"
+                export JAVA_OPTS=$JAVA_OPTS" -Djboss.server.base.dir=""$JBOSS_HOME"/$JBOSS_STANDALONE
+                export JAVA_OPTS=$JAVA_OPTS" -Djboss.log.file=""$JBOSS_CONSOLE_LOG"
+                #export JAVA_OPTS=$JAVA_OPTS" -Dlog4j.debug"   
+                #export JAVA_OPTS=$JAVA_OPTS" -Djboss.node.name=host1"
+                #export JAVA_OPTS=$JAVA_OPTS" -b=0.0.0.0"
+                ;;
+            retrievew|retrieve)  
+                export JAVA_OPTS=$JAVA_OPTS" -Djboss.log.file=""$JBOSS_CONSOLE_LOG"
+                ;;
         esac
-        ;;
+        "$JBOSS_HOME"/bin/standalone.bat 
+        JAVA_OPTS=$OLD_JAVA_OPTS
   esac
 }
 
