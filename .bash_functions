@@ -14,12 +14,14 @@ tenv() {
     TJBOSS=$PARAM_JBOSS
     export TENV
     export TJBOSS
-
+    export JBOSS_STANDALONE=standalone
+    
     MSG=$TENV
     if [[ $TENV == "api" ]]; then
         export PROJECT_SRC="E:\workarea\code\ClinicalGenomics\api\whole_api_to_rename\cga-api-src\trunk"
         export PROJECT_CONF="E:\workarea\code\ClinicalGenomics\api\whole_api_to_rename\cga-api-conf\trunk"
         export APP_CONF=$PROJECT_CONF"\app-conf\local"
+        export JBOSS_STANDALONE=standaloneapi
     elif [[ $TENV == "retrieve" ]]; then
         export PROJECT_SRC="E:\workarea\code\ClinicalGenomics\services\whole_services_to_rename\cgs-retrieve\cgs-retrieve-src\trunk"
         export PROJECT_CONF="E:\workarea\code\ClinicalGenomics\services\whole_services_to_rename\cgs-retrieve\cgs-retrieve-conf\trunk"
@@ -28,10 +30,13 @@ tenv() {
         export PROJECT_SRC="E:\workarea\code\ClinicalGenomics\api\api-wildfly\cga-api-src"
         export PROJECT_CONF="E:\workarea\code\ClinicalGenomics\api\api-wildfly\cga-api-conf"
         export APP_CONF=$PROJECT_CONF"\app-conf\local"
+        export JBOSS_CONSOLE_LOG="E:/tmp/api.log"
+        export JBOSS_STANDALONE=standaloneapi
     elif [[ $TENV == "retrievew" ]]; then
         export PROJECT_SRC="E:\workarea\code\ClinicalGenomics\services\retrieve-wildfly\cgs-retrieve-src"
         export PROJECT_CONF="E:\workarea\code\ClinicalGenomics\services\retrieve-wildfly\cgs-retrieve-conf"
         export APP_CONF=$PROJECT_CONF"\app-conf\dev-dtc"  
+        export JBOSS_CONSOLE_LOG="E:/tmp/retrieve.log"
     else
         MSG="UNKNOWN";
     fi
@@ -47,6 +52,7 @@ tenv() {
         export JAVA_HOME="E:\workarea\tools\jdk1.7.0_71"
         export JBOSS_HOME="E:\workarea\tools\server\jboss-eap-6.3"
         export MAVEN_OPTS="-Xmx1024m"
+        export JBOSS_STANDALONE=standalone
     elif [[ $TJBOSS == "jboss5" ]]; then
         export JAVA_HOME="E:\workarea\tools\jdk1.6.0_20"
         export JBOSS_HOME="e:\workarea\tools\server\jboss-5.1.0.GA"
@@ -60,7 +66,7 @@ tcleandeploy() {
         jboss5)
             rm -rf "$JBOSS_HOME"/server/$JBOSS_CONFIG/deploy/* ;;
         *)
-            rm -rf "$JBOSS_HOME"/standalone/deployments/*
+            rm -rf "$JBOSS_HOME"/$JBOSS_STANDALONE/deployments/*
     esac    
 }
 
@@ -70,7 +76,7 @@ tdep() {
         jboss5)
             DESTINATION="$JBOSS_HOME"/server/$JBOSS_CONFIG/deploy;;
         *)
-            DESTINATION="$JBOSS_HOME"/standalone/deployments;;
+            DESTINATION="$JBOSS_HOME"/$JBOSS_STANDALONE/deployments;;
     esac
 
     cp -v "$PROJECT_SRC"/$DEPLOYMENT_SOURCE $DESTINATION
@@ -112,10 +118,10 @@ trecycle() {
                 rm -rf "$JBOSS_HOME"/server/$JBOSS_CONFIG/tmp  && echo "tmp" && echo "DONE."
             ;;
         *) 
-            echo "Recycling $JBOSS_HOME/standalone ..."
-            rm -rf "$JBOSS_HOME"/standalone/log      && echo "log" && \
-                rm -rf "$JBOSS_HOME"/standalone/data && echo "data" && \
-                rm -rf "$JBOSS_HOME"/standalone/tmp  && echo "tmp" && echo "DONE."        
+            echo "Recycling $JBOSS_HOME/$JBOSS_STANDALONE ..."
+            rm -rf "$JBOSS_HOME"/$JBOSS_STANDALONE/log      && echo "log" && \
+                rm -rf "$JBOSS_HOME"/$JBOSS_STANDALONE/data && echo "data" && \
+                rm -rf "$JBOSS_HOME"/$JBOSS_STANDALONE/tmp  && echo "tmp" && echo "DONE."        
             ;;
     esac
 }
@@ -124,7 +130,14 @@ trun() {
   if _isEnvironmentSet; then return; fi
   case $TJBOSS in
     jboss5) "$JBOSS_HOME"/bin/run.bat -c cgt ;;
-    *)      "$JBOSS_HOME"/bin/standalone.bat ;;
+    *) 
+        case $TENV in
+            apiw|api)   "$JBOSS_HOME"/bin/standalone.bat -Djboss.socket.binding.port-offset=100 -Djboss.server.base.dir="$JBOSS_HOME"/$JBOSS_STANDALONE
+                # -Djboss.node.name=host1 -b=0.0.0.0
+            ;;
+            *)          "$JBOSS_HOME"/bin/standalone.bat ;;
+        esac
+        ;;
   esac
 }
 
